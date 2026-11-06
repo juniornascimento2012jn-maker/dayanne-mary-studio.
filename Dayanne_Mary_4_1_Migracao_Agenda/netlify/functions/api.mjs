@@ -242,15 +242,19 @@ async function route(req){
  const url=new URL(req.url),resource=url.searchParams.get('resource'),id=url.searchParams.get('id');
  // Safe deployment diagnostic. Does not expose credentials or read booking data.
  if(resource==='health'&&req.method==='GET'){
-  let credentialStatus='missing';
+  let credentialStatus='missing',credentialFormat='missing',credentialLengthBand='0',credentialError='none';
   const raw=process.env.FIREBASE_SERVICE_ACCOUNT_B64;
   if(raw){
+   const trimmed=raw.trim();
+   credentialFormat=trimmed.startsWith('gz:')?'gzip-base64':trimmed.startsWith('{')?'raw-json':trimmed.startsWith('"')?'quoted':/^[A-Za-z0-9+/=\\s]+$/.test(trimmed)?'plain-base64':'other';
+   credentialLengthBand=trimmed.length<=5000?'under-5001':'over-5000';
    try {
     const parsed=parseServiceAccount(raw);
     credentialStatus=parsed.project_id==='dayanne-mary'&&parsed.private_key&&parsed.client_email?'valid':'invalid';
-   }catch{credentialStatus='invalid';}
+    if(credentialStatus==='invalid')credentialError='project-or-fields';
+   }catch{credentialStatus='invalid';credentialError='decode-or-json';}
   }
-  return respond({ok:true,version:'4.1.3-compressed-secret',credentialStatus});
+  return respond({ok:true,version:'4.1.4-secret-format',credentialStatus,credentialFormat,credentialLengthBand,credentialError});
  }
  const db=getDB();
  if(resource==='admin-check'){await adminUser(req);return respond({ok:true});}
