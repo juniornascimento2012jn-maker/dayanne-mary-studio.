@@ -19,7 +19,21 @@ function getDB(){
  if(!getApps().length){
   const b64=process.env.FIREBASE_SERVICE_ACCOUNT_B64;
   if(!b64)throw Object.assign(new Error('FIREBASE_SERVICE_ACCOUNT_B64 não configurado.'),{http:503});
-  const key=JSON.parse(Buffer.from(b64,'base64').toString('utf8'));
+  // Netlify accepts a base64 service-account JSON; tolerate an accidentally
+  // pasted raw JSON or a quoted base64 string without disclosing secret data.
+  let key;
+  try {
+   let credential=b64.trim();
+   if(credential.startsWith('"')&&credential.endsWith('"'))credential=JSON.parse(credential);
+   if(typeof credential!=='string')throw new Error('Invalid credential wrapper');
+   credential=credential.trim();
+   const jsonText=credential.startsWith('{')?credential:Buffer.from(credential.replace(/\s/g,''),'base64').toString('utf8');
+   key=JSON.parse(jsonText.replace(/^\uFEFF/,''));
+   if(!key||typeof key!=='object'||!key.private_key||!key.client_email)throw new Error('Missing service account fields');
+  } catch {
+   console.error('Netlify API: credencial Firebase inválida ou codificação incorreta; verifique FIREBASE_SERVICE_ACCOUNT_B64.');
+   throw Object.assign(new Error('Configuração do servidor inválida: credencial Firebase. Contate o suporte do estúdio.'),{http:503});
+  }
   if(key.project_id!=='dayanne-mary')throw Object.assign(new Error('O projeto Firebase esperado não corresponde às credenciais.'),{http:503});
   initializeApp({credential:cert(key),projectId:key.project_id});
  }
