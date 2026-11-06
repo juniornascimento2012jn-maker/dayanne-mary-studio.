@@ -226,7 +226,22 @@ async function saveCampaign(db,id,data){
 }
 async function route(req){
  checkOrigin(req);
- const db=getDB(),url=new URL(req.url),resource=url.searchParams.get('resource'),id=url.searchParams.get('id');
+ const url=new URL(req.url),resource=url.searchParams.get('resource'),id=url.searchParams.get('id');
+ // Safe deployment diagnostic. Does not expose credentials or read booking data.
+ if(resource==='health'&&req.method==='GET'){
+  let credentialStatus='missing';
+  const raw=process.env.FIREBASE_SERVICE_ACCOUNT_B64;
+  if(raw){
+   try {
+    let value=raw.trim();
+    if(value.startsWith('"')&&value.endsWith('"'))value=JSON.parse(value);
+    const parsed=JSON.parse(value.trim().startsWith('{')?value:Buffer.from(value.replace(/\s/g,''),'base64').toString('utf8'));
+    credentialStatus=parsed.project_id==='dayanne-mary'&&parsed.private_key&&parsed.client_email?'valid':'invalid';
+   }catch{credentialStatus='invalid';}
+  }
+  return respond({ok:true,version:'4.1.2-diagnostic',credentialStatus});
+ }
+ const db=getDB();
  if(resource==='admin-check'){await adminUser(req);return respond({ok:true});}
  if(req.method==='GET'){
   const isAdmin=await optionalAdmin(req);
