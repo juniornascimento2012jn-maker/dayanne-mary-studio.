@@ -1,4 +1,5 @@
 import {createHash,randomBytes,timingSafeEqual} from 'node:crypto';
+import {gunzipSync} from 'node:zlib';
 import {initializeApp,cert,getApps} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 import {getAuth} from 'firebase-admin/auth';
@@ -15,6 +16,24 @@ const CONFIG='dm_bs_config/main';
 const RATE='dm_bs_rate';
 const respond=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
 const fail=(message,status=400)=>respond({error:message},status);
+// Supports compact gzip+base64 ("gz:" prefix) to fit Netlify's 5000-character
+// limit for individual environment variable values. Never log the raw key.
+function parseServiceAccount(raw){
+ let value=raw.trim();
+ if(value.startsWith('"')&&value.endsWith('"'))value=JSON.parse(value);
+ if(typeof value!=='string')throw new Error('Invalid credential wrapper');
+ value=value.trim();
+ let jsonText;
+ if(value.startsWith('gz:')){
+  const bytes=Buffer.from(value.slice(3).replace(/\s/g,''),'base64');
+  jsonText=gunzipSync(bytes,{maxOutputLength:65536}).toString('utf8');
+ }else{
+  jsonText=value.startsWith('{')?value:Buffer.from(value.replace(/\s/g,''),'base64').toString('utf8');
+ }
+ const key=JSON.parse(jsonText.replace(/^\uFEFF/,''));
+ if(!key||typeof key!=='object'||!key.private_key||!key.client_email)throw new Error('Missing service account fields');
+ return key;
+}
 function getDB(){
  if(!getApps().length){
   const b64=process.env.FIREBASE_SERVICE_ACCOUNT_B64;
@@ -23,13 +42,7 @@ function getDB(){
   // pasted raw JSON or a quoted base64 string without disclosing secret data.
   let key;
   try {
-   let credential=b64.trim();
-   if(credential.startsWith('"')&&credential.endsWith('"'))credential=JSON.parse(credential);
-   if(typeof credential!=='string')throw new Error('Invalid credential wrapper');
-   credential=credential.trim();
-   const jsonText=credential.startsWith('{')?credential:Buffer.from(credential.replace(/\s/g,''),'base64').toString('utf8');
-   key=JSON.parse(jsonText.replace(/^\uFEFF/,''));
-   if(!key||typeof key!=='object'||!key.private_key||!key.client_email)throw new Error('Missing service account fields');
+   key=parseServiceAccount(b64);
   } catch {
    console.error('Netlify API: credencial Firebase inválida ou codificação incorreta; verifique FIREBASE_SERVICE_ACCOUNT_B64.');
    throw Object.assign(new Error('Configuração do servidor inválida: credencial Firebase. Contate o suporte do estúdio.'),{http:503});
@@ -233,13 +246,11 @@ async function route(req){
   const raw=process.env.FIREBASE_SERVICE_ACCOUNT_B64;
   if(raw){
    try {
-    let value=raw.trim();
-    if(value.startsWith('"')&&value.endsWith('"'))value=JSON.parse(value);
-    const parsed=JSON.parse(value.trim().startsWith('{')?value:Buffer.from(value.replace(/\s/g,''),'base64').toString('utf8'));
+    const parsed=parseServiceAccount(raw);
     credentialStatus=parsed.project_id==='dayanne-mary'&&parsed.private_key&&parsed.client_email?'valid':'invalid';
    }catch{credentialStatus='invalid';}
   }
-  return respond({ok:true,version:'4.1.2-diagnostic',credentialStatus});
+  return respond({ok:true,version:'4.1.3-compressed-secret',credentialStatus});
  }
  const db=getDB();
  if(resource==='admin-check'){await adminUser(req);return respond({ok:true});}
