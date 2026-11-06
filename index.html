@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Dayanne Mary Beauty Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#fdf2f8', 100: '#fce7f3', 500: '#ec4899', 600: '#db2777', 900: '#831843' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- CABEÇALHO -->
+    <header class="glass shadow-sm sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4 sm:gap-6">
+                <div class="relative z-10 shrink-0 flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-full shadow-sm border border-gray-100 bg-white">
+                    <img src="logo.png" alt="Logo Dayanne" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col relative z-10">
+                    <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight leading-[1.05] max-w-[180px] sm:max-w-[220px]">
+                        Dayanne Mary
+                    </h1>
+                    <span class="text-[10px] sm:text-[11px] font-black text-brand-500 tracking-[0.15em] uppercase mt-2 opacity-90">
+                        Beauty Studio
+                    </span>
+                </div>
+            </div>
+            <button onclick="window.toggleAdmin()" class="relative z-10 shrink-0 text-[10px] font-bold text-gray-500 bg-white border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors uppercase tracking-wider flex items-center shadow-sm">
+                Admin <span id="online-badge" class="inline-block w-2 h-2 bg-green-500 rounded-full ml-1.5 animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.6)]"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA DO CLIENTE -->
+    <main class="max-w-3xl mx-auto px-4 py-6 w-full flex-grow" id="client-view">
+        
+        <div id="my-bookings-container" class="mb-8 hidden">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Meus Agendamentos
+            </h2>
+            <div id="my-bookings-list" class="space-y-3"></div>
+        </div>
+
+        <div id="reschedule-alert" class="hidden bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 flex items-start gap-3">
+            <svg class="w-6 h-6 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <h4 class="font-bold text-blue-900 text-sm">Modo Reagendamento Ativo</h4>
+                <p class="text-blue-700 text-xs mt-1">Escolha a nova data e horário. O agendamento antigo só será cancelado após a confirmação.</p>
+                <button onclick="window.cancelReschedule()" class="text-blue-600 font-bold text-xs mt-2 underline">Cancelar Reagendamento</button>
+            </div>
+        </div>
+
+        <div id="step-services" class="fade-in">
+            <h2 class="text-xl font-black text-gray-900 mb-4">O que vamos fazer hoje?</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="services-grid"></div>
+            <div id="multi-services-panel" class="bg-white border border-gray-100 rounded-2xl p-4 mt-4 hidden">
+                <p id="multi-services-summary" class="text-sm text-gray-700 font-bold"></p>
+                <button onclick="window.proceedWithServices()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-black py-3 rounded-xl mt-3">Escolher dia e horário</button>
+            </div>
+        </div>
+
+        <div id="step-datetime" class="hidden fade-in mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-black text-gray-900">Escolha o Dia</h2>
+                <button onclick="window.backToServices()" class="text-sm font-bold text-brand-500 bg-brand-50 px-3 py-1.5 rounded-lg transition-colors hover:bg-brand-100">Voltar</button>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="window.changeMonth(-1)" class="p-2 text-gray-400 hover:text-gray-700 font-bold">&lt;</button>
+                    <h3 id="current-month-year" class="font-bold text-gray-800 capitalize"></h3>
+                    <button onclick="window.changeMonth(1)" class="p-2 text-gray-400 hover:text-gray-700 font-bold">&gt;</button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400 mb-2">
+                    <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1"></div>
+            </div>
+
+            <div id="time-slots-container" class="hidden fade-in">
+                <h2 class="text-xl font-black text-gray-900 mb-4">Horários Disponíveis</h2>
+                <div id="time-slots" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+            </div>
+        </div>
+
+        <div id="step-details" class="hidden fade-in mt-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-black text-gray-900">Quase lá!</h2>
+                    <button onclick="window.backToDateTime()" class="text-sm font-bold text-brand-500 bg-brand-50 px-3 py-1.5 rounded-lg transition-colors hover:bg-brand-100">Voltar</button>
+                </div>
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Como podemos te chamar?</label>
+                        <input type="text" id="client-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="Seu nome completo">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Seu WhatsApp</label>
+                        <input type="tel" id="client-phone" oninput="window.maskPhone(this)" maxlength="15" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-medium focus:ring-2 focus:ring-brand-500 outline-none transition-all" placeholder="(DD) 9XXXX-XXXX">
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-5">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Resumo</h4>
+                    <p class="font-bold text-gray-900" id="summary-service"></p>
+                    <p class="text-brand-600 font-bold text-sm" id="summary-date"></p>
+                    <p class="text-gray-500 font-medium text-sm mt-1" id="summary-price"></p>
+                </div>
+                <button onclick="window.confirmBooking()" id="btn-confirm" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-black text-lg py-4 rounded-xl shadow-md transition-all active:scale-[0.98] flex justify-center items-center">
+                    Confirmar Agendamento
+                </button>
+            </div>
+        </div>
+
+        <div id="step-success" class="hidden flex flex-col items-center justify-center py-10 fade-in">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-2xl font-black text-gray-900 mb-2 text-center">Tudo Certo!</h2>
+            <p class="text-gray-600 text-center mb-8" id="success-message"></p>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 w-full mb-8 flex gap-3">
+                <svg class="w-6 h-6 text-yellow-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-sm text-yellow-800">
+                        <span class="font-bold">Aviso Importante:</span> Para garantirmos o atendimento, tolerância máxima de <strong id="tolerancia-text">15 minutos</strong> de atraso.
+                    </p>
+                    <p class="text-sm text-yellow-800 mt-2 font-bold" id="endereco-text"></p>
+                </div>
+            </div>
+
+            <button onclick="window.sendWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-lg py-4 rounded-xl shadow-md transition-all active:scale-[0.98] flex justify-center items-center gap-2 mb-4">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Enviar para o WhatsApp
+            </button>
+            <button onclick="window.resetApp()" class="w-full text-gray-500 font-bold py-3">Fazer novo agendamento</button>
+        </div>
+    </main>
+
+    <!-- ÁREA DO ADMIN -->
+    <main class="max-w-3xl mx-auto px-4 py-6 hidden w-full flex-grow" id="admin-view">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-black text-gray-900">Painel do Admin</h2>
+            <button onclick="window.toggleAdmin()" class="text-sm font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-xl">Sair</button>
+        </div>
+
+        <div id="admin-login" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-sm mx-auto mt-10 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h3 class="font-black text-lg mb-4">Acesso Restrito</h3>
+            <input type="email" id="admin-email" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center text-sm mb-3 outline-none" placeholder="E-mail administrativo" autocomplete="username">
+            <input type="password" id="admin-password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center text-xl tracking-widest mb-4 font-bold focus:ring-2 focus:ring-brand-500 outline-none" placeholder="••••">
+            <button onclick="window.loginAdmin()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl transition-colors">Entrar</button>
+        </div>
+
+        <div id="admin-dashboard" class="hidden">
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-white border border-green-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-green-50 rounded-bl-full -mr-4 -mt-4"></div>
+                    <span class="text-xs font-bold text-green-600 uppercase tracking-wider relative z-10">Previsão (R$)</span>
+                    <h3 class="text-2xl font-black text-gray-900 mt-1 relative z-10" id="total-revenue">R$ 0</h3>
+                    <p class="text-[10px] font-bold text-gray-400 mt-1 relative z-10" id="revenue-label">Agendamentos</p>
+                </div>
+                <div class="bg-white border border-brand-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-brand-50 rounded-bl-full -mr-4 -mt-4"></div>
+                    <span class="text-xs font-bold text-brand-600 uppercase tracking-wider relative z-10">Agendamentos</span>
+                    <h3 class="text-2xl font-black text-gray-900 mt-1 relative z-10" id="total-bookings-count">0</h3>
+                    <p class="text-[10px] font-bold text-gray-400 mt-1 relative z-10">Pendentes e Confirmados</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-4 justify-between items-center">
+                <select id="admin-filter-type" onchange="window.changeFilter()" class="bg-white shadow-sm border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 outline-none focus:border-brand-500">
+                    <option value="dia">Ver Por Dia</option>
+                    <option value="mes">Ver Por Mês</option>
+                    <option value="todos">Ver Todos</option>
+                </select>
+                
+                <button onclick="window.openBlocksModal()" class="bg-purple-50 text-purple-600 border border-purple-100 rounded-xl px-4 py-2.5 text-sm font-bold hover:bg-purple-100 transition-colors flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Folgas / Férias
+                </button>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
+                <div class="flex justify-between items-center gap-2 mb-3"><h3 class="font-bold text-gray-900">Promoções</h3><span class="text-xs text-brand-600 font-bold">Editável</span></div>
+                <div id="campaigns-admin-list" class="space-y-2 mb-3"></div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input id="campaign-name" placeholder="Nome da campanha" class="col-span-2 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm" value="Black Friday">
+                    <input id="campaign-discount" type="number" min="0" max="100" step="1" placeholder="Desconto %" class="bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm" value="25">
+                    <select id="campaign-enabled" class="bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm"><option value="true">Ativa</option><option value="false">Desativada</option></select>
+                    <label class="text-xs text-gray-500">Data de início<input id="campaign-start" type="date" value="2026-11-01" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm"></label>
+                    <label class="text-xs text-gray-500">Data de término<input id="campaign-end" type="date" value="2026-11-30" class="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl text-sm"></label>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">Serviços participantes:</div>
+                <div id="campaign-services" class="grid grid-cols-2 gap-1 mb-3 text-xs"></div>
+                <button onclick="window.saveCampaign()" class="w-full bg-brand-500 text-white rounded-xl py-3 font-bold">Salvar promoção</button>
+            </div>
+            <details class="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
+                <summary class="font-bold text-gray-900 cursor-pointer">Agendamento manual / Encaixe</summary>
+                <p class="text-xs text-gray-500 mt-2 mb-3">Horários excepcionais podem ser cadastrados pela administradora, respeitando os conflitos de agenda.</p>
+                <div id="manual-services" class="grid grid-cols-2 gap-1 text-xs mb-3"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="manual-client" class="col-span-2 border rounded-xl p-2 text-sm" placeholder="Nome da cliente">
+                    <input id="manual-phone" class="col-span-2 border rounded-xl p-2 text-sm" placeholder="WhatsApp com DDD">
+                    <input id="manual-day" type="date" class="border rounded-xl p-2 text-sm">
+                    <input id="manual-time" type="time" class="border rounded-xl p-2 text-sm">
+                </div>
+                <button onclick="window.saveManualBooking()" class="w-full bg-brand-500 text-white font-bold rounded-xl py-3 mt-3">Salvar agendamento manual</button>
+            </details>
+            <details class="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
+                <summary class="font-bold text-gray-900 cursor-pointer">Horários de funcionamento</summary>
+                <div id="admin-hours-list" class="space-y-2 mt-3"></div>
+                <button onclick="window.saveOpeningHours()" class="w-full bg-brand-500 text-white font-bold rounded-xl py-3 mt-3">Salvar horários</button>
+            </details>
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
+                <h3 class="font-bold text-gray-900 mb-2">Serviços e preços</h3>
+                <div id="admin-services-list" class="space-y-2"></div>
+                <button onclick="window.addNewService()" class="mt-3 bg-gray-900 text-white text-sm font-bold rounded-xl px-4 py-2">Adicionar serviço</button>
+            </div>
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
+                <h3 class="font-bold text-gray-900 mb-2">Indicadores</h3>
+                <div id="admin-indicators" class="grid grid-cols-2 gap-2 text-sm"></div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 min-h-[60px]">
+                    <h3 class="font-bold text-gray-900" id="agenda-title">Agenda</h3>
+                    <div class="flex gap-2" id="admin-date-controls">
+                        <button onclick="window.changeAdminDate(-1)" class="p-1 text-gray-500 font-bold hover:bg-gray-200 rounded">&lt;</button>
+                        <span id="admin-current-date" class="font-bold text-sm text-brand-600 px-2 flex items-center capitalize">Hoje</span>
+                        <button onclick="window.changeAdminDate(1)" class="p-1 text-gray-500 font-bold hover:bg-gray-200 rounded">&gt;</button>
+                    </div>
+                </div>
+                <div id="admin-bookings-list" class="divide-y divide-gray-50 p-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modais (Bloqueios, Avisos, Confirmações) -->
+    <div id="blocks-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center max-h-[90vh] flex flex-col">
+            <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0">
+                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2 shrink-0">Bloqueio de Agenda</h3>
+            <p class="text-gray-600 text-sm mb-4 shrink-0">Bloqueie dias ou períodos.</p>
+
+            <div class="space-y-3 mb-4 text-left shrink-0">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Qual Período?</label>
+                    <select id="block-period" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 font-medium focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+                        <option value="integral">Dia Inteiro</option>
+                        <option value="manha">Somente Manhã (Até 12:00)</option>
+                        <option value="tarde">Somente Tarde (Após 12:00)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Data Início</label>
+                        <input type="date" id="block-start" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 font-medium text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Data Fim (Opcional)</label>
+                        <input type="date" id="block-end" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 font-medium text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+                    </div>
+                </div>
+                <button onclick="window.saveBlock()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl transition-colors mt-2">Salvar Bloqueio</button>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4 text-left flex-1 min-h-[150px] overflow-hidden flex flex-col">
+                <h4 class="text-sm font-bold text-gray-900 mb-2 shrink-0">Bloqueios Ativos:</h4>
+                <div id="blocks-list" class="space-y-2 overflow-y-auto flex-1 pr-1 pb-2"></div>
+            </div>
+
+            <button onclick="window.closeBlocksModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors mt-4 shrink-0">Voltar</button>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-gray-200 border-t-brand-500 rounded-full animate-spin mb-3"></div>
+        <p class="text-brand-600 font-bold animate-pulse text-sm">Atualizando...</p>
+    </div>
+
+    <div id="custom-alert-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 transition-transform duration-200" id="alert-modal-content">
+            <div id="alert-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-50">
+                <svg id="alert-icon" class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 id="alert-title" class="text-xl font-black text-gray-900 mb-2">Aviso</h3>
+            <p id="alert-message" class="text-gray-600 text-sm mb-6">Mensagem de erro aqui.</p>
+            <button onclick="window.closeAlert()" id="alert-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors">Entendi</button>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Tem certeza?</h3>
+            <p id="confirm-message" class="text-gray-600 text-sm mb-6">Deseja realmente cancelar este agendamento?</p>
+            <div class="flex gap-3">
+                <button onclick="window.closeConfirm()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Voltar</button>
+                <button onclick="window.executeConfirm()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors">Sim</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="discount-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center">
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">Alterar Valor</h3>
+            <p class="text-gray-600 text-sm mb-4">Digite o novo valor final para este serviço.</p>
+            
+            <div class="relative mb-6">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">R$</span>
+                <input type="text" inputmode="decimal" id="discount-value" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 text-lg font-black text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="window.closeDiscountModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancelar</button>
+                <button onclick="window.confirmDiscount()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors">Salvar Valor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOTOR JAVASCRIPT & FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // Operações no Firestore ocorrem SOMENTE na Netlify Function, não no navegador.
+
+        // ==========================================
+        // DADOS EXCLUSIVOS DA DAYANNE
+        // ==========================================
+        const CLIENTE_CONFIG = {
+            nome: "Dayanne Mary Beauty Studio",
+            
+            telefone: "5519971253777", 
+            telefoneDisplay: "(19) 97125-3777", 
+            
+            endereco: "Rua Pedreira n46 Bairro: Pq Nova Veneza Inocoop cep: 13177-252",
+            toleranciaAtraso: 15,
+            
+            // Credenciais administrativas devem ser mantidas exclusivamente no Firebase Authentication.
+            
+            firebase: {
+                apiKey: "AIzaSyDVzI_0zFhzUhkrzQQEBI32BqpTp5Foa-Y",
+                authDomain: "dayanne-mary.firebaseapp.com",
+                projectId: "dayanne-mary",
+                storageBucket: "dayanne-mary.firebasestorage.app",
+                messagingSenderId: "348868853685",
+                appId: "1:348868853685:web:bc50376e46114e6fc123fc"
+            },
+            
+            // LISTA DE SERVIÇOS COMPLETAMENTE ATUALIZADA
+            servicos: [
+                { id: "s1", nome: "Alongamento e molde F1", valor: 150.00, duracao: 240 },
+                { id: "s2", nome: "Manutenção em gel", valor: 120.00, duracao: 180 },
+                { id: "s3", nome: "Blindagem", valor: 70.00, duracao: 90 },
+                { id: "s4", nome: "Banho de gel", valor: 90.00, duracao: 90 },
+                { id: "s5", nome: "Esmaltação em gel", valor: 60.00, duracao: 90 },
+                { id: "s6", nome: "Manicure tradicional (pé e mão)", valor: 70.00, duracao: 120 },
+                { id: "s7", nome: "Apenas mão", valor: 35.00, duracao: 60 },
+                { id: "s8", nome: "Design de sobrancelha", valor: 35.00, duracao: 40 },
+                { id: "s9", nome: "Design de sobrancelha com henna", valor: 45.00, duracao: 60 },
+                { id: "s10", nome: "Brow lamination", valor: 100.00, duracao: 60 },
+                { id: "s11", nome: "Lash lifting", valor: 100.00, duracao: 60 },
+                { id: "s12", nome: "Cílios tufinho", valor: 100.00, duracao: 60 },
+                { id: "s13", nome: "Manicure combinada", valor: 70.00, duracao: 120 }
+            ],
+            
+            diasFuncionamento: [2, 3, 4, 5, 6],
+            
+            horariosPorDia: {
+                2: { inicio: "09:00", fim: "18:00" }, 
+                3: { inicio: "09:00", fim: "18:00" }, 
+                4: { inicio: "09:00", fim: "18:00" }, 
+                5: { inicio: "09:00", fim: "18:00" }, 
+                6: { inicio: "09:00", fim: "15:00" }  
+            }
+        };
+
+        // Aplicativo original: mesma configuração pública de Authentication, sem senha fixa.
+        // Novas reservas na coleção original agendamentos; promoções e configurações mantidas em dm_bs_*.
+        // Acesso às coleções originais acontece exclusivamente na API com autenticação administrativa para mudanças.
+        const app = initializeApp(CLIENTE_CONFIG.firebase);
+        const db = {isolated: true};
+        const auth = getAuth(app);
+        const listeners = [];
+        const collection = (_db, name) => ({name});
+        const doc = (_db, name, id) => ({name,id});
+        const query = ref => ref;
+        async function apiCall(method, resource, id=null, payload=null) {
+            let url='/api?resource='+encodeURIComponent(resource);
+            if(id)url+='&id='+encodeURIComponent(id);
+            const headers={'content-type':'application/json'};
+            if(auth?.currentUser){
+                const jwt=await auth.currentUser.getIdToken();
+                headers.authorization='Bearer '+jwt;
+            }
+            const response=await fetch(url,{method,headers,...(payload?{body:JSON.stringify(payload)}:{})});
+            let value;try{value=await response.json();}catch{throw Error('A API do Netlify não respondeu corretamente. Confira a publicação das funções.');}
+            if(!response.ok)throw Error(value.error||'Falha na API');
+            return value;
+        }
+        function collectionSnapshot(items) {
+            const docs=(items||[]).map(item=>({id:item.id,data:()=>({...item})}));
+            return {docs,empty:docs.length===0,forEach:callback=>docs.forEach(callback)};
+        }
+        function onSnapshot(ref, callback, onError) {
+            const listener={ref,callback,onError};listeners.push(listener);
+            refreshListener(listener);
+            return ()=>{const idx=listeners.indexOf(listener);if(idx>=0)listeners.splice(idx,1)};
+        }
+        async function refreshListener(listener) {
+            try{const result=await apiCall('GET',listener.ref.name);
+                listener.callback(collectionSnapshot(result.docs));}
+            catch(err){console.error('Erro ao atualizar '+listener.ref.name,err);if(listener.onError)listener.onError(err);}
+        }
+        async function refreshAll(){await Promise.all(listeners.map(refreshListener));}
+        setInterval(refreshAll,18000);
+        async function addDoc(ref,data){const result=await apiCall('POST',ref.name,null,{data});await refreshAll();return result;}
+        async function updateDoc(ref,data){const result=await apiCall('PUT',ref.name,ref.id,{data});await refreshAll();return result;}
+        async function setDoc(ref,data){const result=await apiCall('PUT',ref.name,ref.id,{data});await refreshAll();return result;}
+        async function deleteDoc(ref){
+            const owned=JSON.parse(localStorage.getItem('myBookings')||'[]').find(b=>b.id===ref.id);
+            const result=await apiCall('DELETE',ref.name,ref.id,{token:owned?.token||null});
+            await refreshAll();return result;
+        }
+
+
+        let state = {
+            selectedService: null,
+            selectedServices: [],
+            campaigns: [],
+            promoCatalog: [],
+            selectedDate: null,
+            selectedTime: null,
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            bookings: [],
+            bloqueios: [], 
+            adminDateOffset: 0,
+            adminFilter: 'dia', 
+            isAdmin: false,
+            rescheduleMode: false,
+            isAdminRescheduling: false, 
+            bookingToReplace: null
+        };
+
+        const getLocalTodayStr = () => {
+            const t = new Date();
+            return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+        }
+
+        // Função para identificar se a sexta-feira atual deve ser bloqueada (até 27/11/2026)
+        const isFridayTemporarilyBlocked = (dateObj) => {
+            const limiteSextas = new Date(2026, 10, 27, 23, 59, 59); // 10 é Novembro no Javascript
+            return dateObj.getDay() === 5 && dateObj <= limiteSextas;
+        }
+
+        document.getElementById('tolerancia-text').innerText = `${CLIENTE_CONFIG.toleranciaAtraso} minutos`;
+        document.getElementById('endereco-text').innerText = `📍 ${CLIENTE_CONFIG.endereco}`;
+
+        window.maskPhone = function(input) {
+            let v = input.value.replace(/\D/g, ''); 
+            if (v.length > 11) v = v.slice(0, 11); 
+            
+            let formatted = v;
+            if (v.length > 2) {
+                formatted = '(' + v.slice(0, 2) + ') ' + v.slice(2);
+            }
+            if (v.length > 7) {
+                formatted = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7);
+            }
+            input.value = formatted;
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+        }
+
+        window.showAlert = function(title, message, isError = true) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+            const btn = document.getElementById('alert-btn');
+            const iconContainer = document.getElementById('alert-icon-container');
+            const icon = document.getElementById('alert-icon');
+            
+            if (isError) {
+                btn.className = "w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors";
+                iconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-50";
+                icon.setAttribute('class', "w-8 h-8 text-red-500");
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
+            } else {
+                btn.className = "w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors";
+                iconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-50";
+                icon.setAttribute('class', "w-8 h-8 text-green-500");
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+            }
+            const modal = document.getElementById('custom-alert-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            setTimeout(() => document.getElementById('alert-modal-content').classList.remove('scale-95'), 10);
+        }
+
+        window.closeAlert = function() {
+            const modal = document.getElementById('custom-alert-modal');
+            document.getElementById('alert-modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }, 200);
+        }
+
+        let confirmAction = null;
+        window.openConfirm = function(message, callback) {
+            document.getElementById('confirm-message').innerText = message;
+            confirmAction = callback;
+            const modal = document.getElementById('custom-confirm-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        window.closeConfirm = function() {
+            const modal = document.getElementById('custom-confirm-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            confirmAction = null;
+        }
+        window.executeConfirm = function() {
+            if(confirmAction) confirmAction();
+            window.closeConfirm();
+        }
+
+        function initApp() {
+            renderServices();
+            if(db) {
+                loadBookingsFromFirebase();
+                loadBlocksFromFirebase();
+                loadCampaignsFromFirebase();
+                loadServicesFromFirebase();
+                loadHoursFromFirebase();
+            } else {
+                console.info('HOMOLOGAÇÃO: Firebase isolado ainda não configurado. Nenhum dado do aplicativo antigo será acessado.');
+                state.campaigns = [{id:'demo-black', nome:'Black Friday', percentual:25, inicio:'2026-11-01', fim:'2026-11-30', ativo:true, servicos:CLIENTE_CONFIG.servicos.map(s=>s.id)}];
+                renderServices();
+            } 
+            checkLocalMyBookings();
+        }
+
+        function loadBlocksFromFirebase() {
+            onSnapshot(query(collection(db, "bloqueios")), (snapshot) => {
+                state.bloqueios = [];
+                snapshot.forEach((doc) => {
+                    state.bloqueios.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if(document.getElementById('step-datetime').classList.contains('hidden') === false) {
+                    generateCalendar();
+                }
+                
+                const list = document.getElementById('blocks-list');
+                if(list && document.getElementById('blocks-modal').style.display !== 'none') {
+                    renderBlocksList();
+                }
+            });
+        }
+
+        function loadBookingsFromFirebase() {
+            onSnapshot(query(collection(db, "agendamentos")), (snapshot) => {
+                state.bookings = [];
+                snapshot.forEach((doc) => {
+                    state.bookings.push({ id: doc.id, ...doc.data() });
+                });
+                if(state.selectedDate) generateTimeSlots(state.selectedDate);
+                if(state.isAdmin) renderAdminBookings();
+                checkLocalMyBookings();
+            });
+        }
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        function selectedDuration() { return state.selectedServices.reduce((n,s)=>n + Number(s.duracao||0),0); }
+        function selectedOriginal() { return state.selectedServices.reduce((n,s)=>n + Number(s.valor||0),0); }
+        function campaignForService(srv, day) {
+            const date = day || getLocalTodayStr();
+            return state.campaigns.filter(c=>c.ativo && c.inicio <= date && c.fim >= date && Array.isArray(c.servicos) && c.servicos.includes(srv.id))
+                .sort((a,b)=>Number(b.percentual)-Number(a.percentual))[0] || null;
+        }
+        function pricedService(srv, day) {
+            const p=campaignForService(srv,day);
+            return {original:Number(srv.valor), final:Math.round(Number(srv.valor)*(1-(p?Number(p.percentual):0)/100)*100)/100, promo:p};
+        }
+        function selectedPricing(day) {
+            const items=state.selectedServices.map(s=>({...s, precos:pricedService(s,day)}));
+            return {items, original:items.reduce((n,s)=>n+s.precos.original,0), final:items.reduce((n,s)=>n+s.precos.final,0)};
+        }
+        function renderServices() {
+            const grid=document.getElementById('services-grid'); grid.innerHTML='';
+            const date=state.selectedDate?`${state.selectedDate.getFullYear()}-${String(state.selectedDate.getMonth()+1).padStart(2,'0')}-${String(state.selectedDate.getDate()).padStart(2,'0')}`:getLocalTodayStr();
+            CLIENTE_CONFIG.servicos.filter(s=>s.ativo!==false).forEach(srv=>{
+                const checked=state.selectedServices.some(s=>s.id===srv.id), prices=pricedService(srv,date);
+                const div=document.createElement('div');
+                div.className=`p-4 rounded-2xl border-2 cursor-pointer transition-all ${checked?'border-brand-500 bg-brand-50 shadow-sm':'border-gray-100 bg-white hover:border-brand-200'}`;
+                div.onclick=()=>selectService(srv);
+                div.innerHTML=`${srv.fotoUrl?`<img src="${escapeHtml(srv.fotoUrl)}" alt="Foto de ${escapeHtml(srv.nome)}" loading="lazy" class="w-full h-28 object-cover rounded-xl mb-2">`:''}<div class="flex justify-between items-start mb-2"><h3 class="font-bold text-gray-900 leading-tight pr-2">${escapeHtml(srv.nome)}</h3><div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${checked?'border-brand-500':'border-gray-300'}">${checked?'<div class="w-2.5 h-2.5 bg-brand-500 rounded-full"></div>':''}</div></div><div class="flex justify-between items-center mt-3"><span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">${srv.duracao} min</span><div class="text-right">${prices.promo?`<span class="text-[10px] font-bold bg-brand-100 text-brand-600 rounded px-1">${prices.promo.percentual}% OFF</span><div class="text-xs line-through text-gray-400">${formatCurrency(prices.original)}</div>`:''}<span class="font-black text-brand-600">${formatCurrency(prices.final)}</span></div></div>`;
+                grid.appendChild(div);
+            });
+            const panel=document.getElementById('multi-services-panel');
+            panel.classList.toggle('hidden',state.selectedServices.length===0);
+            const totals=selectedPricing(date);
+            document.getElementById('multi-services-summary').textContent=`${state.selectedServices.length} serviço(s) • ${selectedDuration()} min • ${formatCurrency(totals.final)}`;
+        }
+        function selectService(srv) {
+            const pos=state.selectedServices.findIndex(s=>s.id===srv.id);
+            if(pos>=0) state.selectedServices.splice(pos,1);
+            else if(state.selectedServices.length>=5) return window.showAlert('Limite','Selecione até 5 procedimentos em uma reserva.');
+            else state.selectedServices.push(srv);
+            state.selectedService=state.selectedServices[0]||null;
+            renderServices();
+        }
+        window.proceedWithServices=function() {
+            if(!state.selectedServices.length) return;
+            document.getElementById('step-services').classList.add('hidden');
+            document.getElementById('step-datetime').classList.remove('hidden');
+            generateCalendar();
+        };
+
+        window.backToServices = function() {
+            document.getElementById('step-datetime').classList.add('hidden');
+            document.getElementById('step-services').classList.remove('hidden');
+        }
+
+        window.backToDateTime = function() {
+            document.getElementById('step-details').classList.add('hidden');
+            document.getElementById('step-datetime').classList.remove('hidden');
+        }
+
+        window.changeMonth = function(offset) {
+            state.currentMonth += offset;
+            if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+            else if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+            generateCalendar();
+        }
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('current-month-year').innerText = `${monthNames[state.currentMonth]} ${state.currentYear}`;
+            grid.innerHTML = '';
+
+            const firstDay = new Date(state.currentYear, state.currentMonth, 1).getDay();
+            const daysInMonth = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(state.currentYear, state.currentMonth, i);
+                const dayOfWeek = date.getDay();
+                
+                const isPast = date < today;
+                const isConfigBlockedDay = !CLIENTE_CONFIG.diasFuncionamento.includes(dayOfWeek);
+                const isTemporarilyBlockedFriday = isFridayTemporarilyBlocked(date);
+                
+                const dataStringFormatada = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const isManualBlocked = state.bloqueios.some(b => b.data === dataStringFormatada && (!b.periodo || b.periodo === 'integral'));
+                
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                
+                if (isPast || isConfigBlockedDay || isManualBlocked || isTemporarilyBlockedFriday) {
+                    btn.className = "p-2 rounded-xl text-sm font-medium text-gray-300 cursor-not-allowed";
+                    btn.disabled = true;
+                } else {
+                    const isSelected = state.selectedDate && date.getTime() === state.selectedDate.getTime();
+                    btn.className = `p-2 rounded-xl text-sm font-bold transition-all ${isSelected ? 'bg-brand-500 text-white shadow-md transform scale-110' : 'text-gray-700 hover:bg-gray-100 active:scale-95'}`;
+                    btn.onclick = () => selectDate(date);
+                }
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectDate(date) {
+            state.selectedDate = date;
+            state.selectedTime = null;
+            generateCalendar();
+            document.getElementById('time-slots-container').classList.remove('hidden');
+            generateTimeSlots(date);
+        }
+
+        function generateTimeSlots(date) {
+            const container = document.getElementById('time-slots');
+            container.innerHTML = '';
+            
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const dateString = `${yyyy}-${mm}-${dd}`;
+            
+            const bookingsForDay = state.bookings.filter(b => b.data === dateString && b.status !== 'cancelado');
+
+            const blocksForToday = state.bloqueios.filter(b => b.data === dateString);
+            const blockManha = blocksForToday.some(b => b.periodo === 'manha');
+            const blockTarde = blocksForToday.some(b => b.periodo === 'tarde');
+
+            const dayOfWeek = date.getDay();
+            let horasHoje = CLIENTE_CONFIG.horariosPorDia[dayOfWeek];
+
+            // Trava de segurança extra para as sextas-feiras
+            if (isFridayTemporarilyBlocked(date)) {
+                horasHoje = null;
+            }
+
+            if (!horasHoje) {
+                container.innerHTML = '<p class="col-span-full text-center text-sm font-bold text-gray-400 py-4">Fechado neste dia.</p>';
+                return;
+            }
+
+            const [startH, startM] = horasHoje.inicio.split(':').map(Number);
+            const [endH, endM] = horasHoje.fim.split(':').map(Number);
+            
+            const startTotalMinutes = startH * 60 + startM;
+            const endTotalMinutes = endH * 60 + endM;
+
+            let times = [];
+            for (let m = startTotalMinutes; m < endTotalMinutes; m += 30) {
+                const h = Math.floor(m / 60);
+                const mins = m % 60;
+                times.push(`${h.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`);
+            }
+
+            const now = new Date();
+            const isToday = date.toDateString() === now.toDateString();
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+
+            times.forEach(time => {
+                const [h, m] = time.split(':').map(Number);
+                const slotMinutes = h * 60 + m;
+                const serviceDuration = selectedDuration();
+                const slotEndMinutes = slotMinutes + serviceDuration;
+                
+                if (isToday) {
+                    const nowMinutes = currentHour * 60 + currentMin;
+                    if (slotMinutes <= nowMinutes) return; 
+                }
+                
+                if (slotEndMinutes > endTotalMinutes) return;
+
+                if (blockManha && slotMinutes < 720) return;
+                if (blockTarde && slotEndMinutes > 720) return;
+
+                let isOccupied = false;
+                for (let b of bookingsForDay) {
+                    if (state.rescheduleMode && state.bookingToReplace && b.id === state.bookingToReplace.id) continue;
+                    
+                    const [bh, bm] = b.hora.split(':').map(Number);
+                    const bStart = bh * 60 + bm;
+                    const bEnd = bStart + b.duracao;
+                    if ((slotMinutes >= bStart && slotMinutes < bEnd) || (slotEndMinutes > bStart && slotEndMinutes <= bEnd) || (slotMinutes <= bStart && slotEndMinutes >= bEnd)) {
+                        isOccupied = true;
+                        break;
+                    }
+                }
+
+                if (!isOccupied) {
+                    const btn = document.createElement('button');
+                    btn.innerText = time;
+                    const isSelected = state.selectedTime === time;
+                    btn.className = `py-2 px-1 rounded-xl text-sm font-bold transition-all border ${isSelected ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-white text-gray-700 border-gray-200 hover:border-brand-300'}`;
+                    btn.onclick = () => selectTime(time);
+                    container.appendChild(btn);
+                }
+            });
+
+            if(container.children.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-sm font-bold text-gray-400 py-4">Nenhum horário disponível neste período.</p>';
+            }
+        }
+
+        function selectTime(time) {
+            state.selectedTime = time;
+            generateTimeSlots(state.selectedDate);
+            showDetailsStep();
+        }
+
+        function showDetailsStep() {
+            document.getElementById('step-services').classList.add('hidden');
+            document.getElementById('step-datetime').classList.add('hidden');
+            document.getElementById('step-details').classList.remove('hidden');
+            
+            document.getElementById('summary-service').innerText = state.selectedServices.map(s=>s.nome).join(' + ');
+            document.getElementById('summary-date').innerText = `${state.selectedDate.toLocaleDateString('pt-BR')} às ${state.selectedTime}`;
+            
+            if (state.rescheduleMode && state.bookingToReplace) {
+                document.getElementById('client-name').value = state.bookingToReplace.cliente;
+                document.getElementById('client-phone').value = state.bookingToReplace.telefoneCliente || '';
+            }
+            const totals=selectedPricing(`${state.selectedDate.getFullYear()}-${String(state.selectedDate.getMonth()+1).padStart(2,'0')}-${String(state.selectedDate.getDate()).padStart(2,'0')}`);
+            document.getElementById('summary-price').innerText = totals.original!==totals.final ? `${formatCurrency(totals.original)} → ${formatCurrency(totals.final)} (desconto ${formatCurrency(totals.original-totals.final)}) • ${selectedDuration()} min` : `${formatCurrency(totals.final)} • ${selectedDuration()} min`;
+        }
+
+        window.confirmBooking = async function() {
+            const name = document.getElementById('client-name').value.trim();
+            const phoneInput = document.getElementById('client-phone').value;
+            const rawPhone = phoneInput.replace(/\D/g, ''); 
+            
+            if(!name) {
+                window.showAlert("Ops!", "Por favor, digite seu nome para confirmar.");
+                return;
+            }
+
+            if(rawPhone.length < 11) {
+                window.showAlert("Ops!", "Por favor, preencha um número de WhatsApp válido com DDD (mínimo de 11 números).");
+                return;
+            }
+
+            const btn = document.getElementById('btn-confirm');
+            btn.innerHTML = '<div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+            btn.disabled = true;
+
+            const yyyy = state.selectedDate.getFullYear();
+            const mm = String(state.selectedDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(state.selectedDate.getDate()).padStart(2, '0');
+            const bookingDateStr = `${yyyy}-${mm}-${dd}`;
+            
+            const realTodayStr = getLocalTodayStr();
+            const statusInicial = (bookingDateStr === realTodayStr) ? 'pendente' : 'confirmado';
+
+            if(!db){
+                btn.innerHTML='Confirmar Agendamento'; btn.disabled=false;
+                window.showAlert('Erro', 'Não foi possível conectar ao servidor de agendamentos.');
+                return;
+            }
+            const totals = selectedPricing(bookingDateStr);
+            const bookingData = {
+                cliente: name,
+                telefoneCliente: phoneInput,
+                servicoId: state.selectedServices[0].id,
+                servicoNome: state.selectedServices.map(s=>s.nome).join(' + '),
+                servicos: totals.items.map(s=>({id:s.id,nome:s.nome,duracao:s.duracao,valorOriginal:s.precos.original,valorFinal:s.precos.final,promocao:s.precos.promo?.nome||null})),
+                valorOriginal: totals.original,
+                valorFinal: totals.final,
+                duracao: selectedDuration(),
+                data: bookingDateStr,
+                hora: state.selectedTime,
+                status: statusInicial,
+                criadoEm: new Date().toISOString(),
+                ...(state.rescheduleMode && state.bookingToReplace ? {rescheduleFrom:state.bookingToReplace.id,rescheduleToken:state.bookingToReplace.token||null}: {})
+            };
+
+            try {
+                const previousId=state.rescheduleMode&&state.bookingToReplace?state.bookingToReplace.id:null;
+                const docRef = await addDoc(collection(db, "agendamentos"), bookingData);
+                if(previousId) removeLocalMyBooking(previousId);
+                saveLocalMyBooking({ id: docRef.id, token: docRef.token, ...bookingData });
+                
+                state.lastBooking = { id: docRef.id, ...bookingData };
+                showSuccessScreen();
+                
+            } catch (error) {
+                console.error(error);
+                btn.innerHTML = 'Confirmar Agendamento';
+                btn.disabled = false;
+                window.showAlert("Erro", error.message || "Ocorreu um erro de conexão. Tente novamente.");
+            }
+        }
+
+        function showSuccessScreen() {
+            if(state.isAdminRescheduling) {
+                const oldDateArr = state.bookingToReplace.data.split('-');
+                const oldDateStr = `${oldDateArr[2]}/${oldDateArr[1]}/${oldDateArr[0]}`;
+                const oldTimeStr = state.bookingToReplace.hora;
+                const newDateStr = state.selectedDate.toLocaleDateString('pt-BR');
+                const newTimeStr = state.selectedTime;
+                const phone = document.getElementById('client-phone').value;
+                const nome = document.getElementById('client-name').value;
+                const servico = state.selectedService.nome;
+                const nomeEstudio = CLIENTE_CONFIG.nome;
+
+                state.rescheduleMode = false;
+                state.isAdminRescheduling = false;
+                state.bookingToReplace = null;
+                window.resetApp();
+                
+                document.getElementById('client-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                renderAdminBookings();
+
+                window.openConfirm("Reagendado com sucesso! Deseja enviar o aviso para a cliente no WhatsApp?", () => {
+                    let num = phone.replace(/\D/g, '');
+                    if(num.length === 10 || num.length === 11) num = '55' + num;
+                    
+                    const msg = `Olá ${nome}, tudo bem? Aqui é do espaço ${nomeEstudio}.\n\nSeu agendamento de *${servico}* foi REAGENDADO com sucesso!\n\n❌ *De:* ${oldDateStr} às ${oldTimeStr}\n✅ *Para:* ${newDateStr} às ${newTimeStr}\n\nQualquer dúvida, estou à disposição!`;
+                    const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+                    
+                    window.open(url, '_blank');
+                });
+
+                return;
+            }
+
+            document.getElementById('step-details').classList.add('hidden');
+            document.getElementById('reschedule-alert').classList.add('hidden');
+            const success = document.getElementById('step-success');
+            
+            success.classList.remove('hidden', 'opacity-0');
+            success.style.display = 'flex';
+
+            const dateStr = state.selectedDate.toLocaleDateString('pt-BR');
+            document.getElementById('success-message').innerHTML = `Te esperamos no dia <strong>${dateStr}</strong> às <strong>${state.selectedTime}</strong>.`;
+            
+            state.rescheduleMode = false;
+            state.bookingToReplace = null;
+        }
+
+        window.sendWhatsApp = function() {
+            if(!state.lastBooking) return;
+            const b = state.lastBooking;
+            const dateStr = state.selectedDate.toLocaleDateString('pt-BR');
+            
+            let msg = `Olá ${CLIENTE_CONFIG.nome}! Acabei de agendar pelo aplicativo.\n\n`;
+            msg += `*${b.servicoNome}*\n`;
+            msg += `📅 ${dateStr} às ${b.hora}\n`;
+            msg += `👤 ${b.cliente}\n`;
+            msg += `📱 Contato: ${b.telefoneCliente}\n\n`;
+            msg += `Aguardo a confirmação!`;
+            
+            const url = `https://wa.me/${CLIENTE_CONFIG.telefone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        window.adminWhatsAppById = function(id) {
+            const booking=state.bookings.find(b=>b.id===id);
+            if(!booking)return;
+            window.adminWhatsApp(booking.telefoneCliente,booking.cliente,booking.data,booking.hora);
+        };
+
+        window.adminWhatsApp = function(phone, nome, data, hora) {
+            if(!phone) {
+                window.showAlert("Ops", "Cliente não informou o telefone direito.");
+                return;
+            }
+            let num = phone.replace(/\D/g, '');
+            if(num.length === 10 || num.length === 11) num = '55' + num;
+            const [ano, mes, dia] = data.split('-');
+            const dataBr = `${dia}/${mes}/${ano}`;
+            
+            const msg = `Olá ${nome}, tudo bem? Aqui é do espaço ${CLIENTE_CONFIG.nome}.\nEstou entrando em contato sobre o seu agendamento no dia ${dataBr} às ${hora}.`;
+            const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function saveLocalMyBooking(booking) {
+            let myBookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
+            myBookings.push(booking);
+            localStorage.setItem('myBookings', JSON.stringify(myBookings));
+            checkLocalMyBookings();
+        }
+
+        function removeLocalMyBooking(id) {
+            let myBookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
+            myBookings = myBookings.filter(b => b.id !== id);
+            localStorage.setItem('myBookings', JSON.stringify(myBookings));
+        }
+
+        function checkLocalMyBookings() {
+            if(state.isAdmin) return;
+            let myBookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
+            const container = document.getElementById('my-bookings-container');
+            const list = document.getElementById('my-bookings-list');
+            
+            if(myBookings.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            list.innerHTML = '';
+            
+            const todayStr = getLocalTodayStr();
+            let activeBookings = [];
+
+            myBookings.forEach(localB => {
+                const fbBooking = state.bookings.find(b => b.id === localB.id);
+                if(fbBooking && fbBooking.data >= todayStr) {
+                    activeBookings.push(fbBooking);
+                } else if (!fbBooking && localB.data >= todayStr) {
+                     activeBookings.push(localB);
+                }
+            });
+
+            if(activeBookings.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            activeBookings.sort((a, b) => new Date(a.data + 'T' + a.hora) - new Date(b.data + 'T' + b.hora));
+
+            activeBookings.forEach(b => {
+                const [ano, mes, dia] = b.data.split('-');
+                const dataBr = `${dia}/${mes}/${ano}`;
+                const isConfirmed = b.status === 'confirmado';
+                const isFinished = b.status === 'concluido';
+                const isCancelled = b.status === 'cancelado';
+
+                let badgeHtml = '';
+                if(isCancelled) {
+                    badgeHtml = `<span class="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-red-50 text-red-600">Cancelado</span>`;
+                } else {
+                    badgeHtml = `<span class="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${isConfirmed ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}">
+                        ${isFinished ? 'Concluído' : isConfirmed ? 'Confirmado' : 'Pendente'}
+                    </span>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = `bg-white p-4 rounded-2xl border ${isCancelled ? 'border-red-100 opacity-75' : 'border-gray-100 shadow-sm'}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-bold ${isCancelled ? 'text-gray-500 line-through' : 'text-gray-900'}">${escapeHtml(b.servicoNome)}</h4>
+                            <p class="text-sm text-gray-500">${dataBr} às ${b.hora}</p>
+                        </div>
+                        ${badgeHtml}
+                    </div>
+                    ${!isCancelled ? `
+                    <div class="flex gap-2 w-full mt-2">
+                        <button onclick="window.startReschedule('${b.id}')" class="flex-1 bg-blue-50 text-blue-600 font-bold py-2 rounded-xl text-xs hover:bg-blue-100 flex justify-center items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Reagendar
+                        </button>
+                        <button onclick="window.confirmCancelMyBooking('${b.id}')" class="flex-1 bg-red-50 text-red-500 font-bold py-2 rounded-xl text-xs hover:bg-red-100 flex justify-center items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Cancelar
+                        </button>
+                    </div>` : ''}
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        window.startReschedule = function(id) {
+            const booking = state.bookings.find(b => b.id === id) || JSON.parse(localStorage.getItem('myBookings')).find(b => b.id === id);
+            if(!booking) return;
+            if(!booking.token) return window.showAlert('Agendamento antigo', 'Agendamentos do sistema anterior devem ser reagendados pelo aplicativo original ou pelo WhatsApp.');
+
+            document.getElementById('step-success').style.display = 'none';
+            document.getElementById('step-success').classList.add('hidden');
+            document.getElementById('step-details').classList.add('hidden');
+            
+            state.rescheduleMode = true;
+            state.bookingToReplace = booking;
+            
+            const srv = CLIENTE_CONFIG.servicos.find(s => s.id === booking.servicoId);
+            state.selectedServices = Array.isArray(booking.servicos) && booking.servicos.length ? booking.servicos.map(item=>CLIENTE_CONFIG.servicos.find(s=>s.id===item.id)||{id:item.id,nome:item.nome,valor:item.valorOriginal,duracao:item.duracao}) : [srv||{id:booking.servicoId,nome:booking.servicoNome,valor:booking.valorOriginal,duracao:booking.duracao}];
+            state.selectedService = state.selectedServices[0];
+            
+            document.getElementById('step-services').classList.add('hidden');
+            document.getElementById('step-datetime').classList.remove('hidden');
+            document.getElementById('reschedule-alert').classList.remove('hidden');
+            
+            generateCalendar();
+            document.getElementById('step-datetime').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.startAdminReschedule = function(id) {
+            const booking = state.bookings.find(b => b.id === id);
+            if(!booking) return;
+
+            if(booking.legado) return window.showAlert('Agendamento antigo', 'Gerencie esta reserva no painel do aplicativo original.');
+            state.rescheduleMode = true;
+            state.isAdminRescheduling = true;
+            state.bookingToReplace = booking;
+            
+            const srv = CLIENTE_CONFIG.servicos.find(s => s.id === booking.servicoId);
+            state.selectedServices = Array.isArray(booking.servicos) && booking.servicos.length ? booking.servicos.map(item=>CLIENTE_CONFIG.servicos.find(s=>s.id===item.id)||{id:item.id,nome:item.nome,valor:item.valorOriginal,duracao:item.duracao}) : [srv||{id:booking.servicoId,nome:booking.servicoNome,valor:booking.valorOriginal,duracao:booking.duracao}];
+            state.selectedService = state.selectedServices[0];
+            
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('client-view').classList.remove('hidden');
+            
+            document.getElementById('step-success').style.display = 'none';
+            document.getElementById('step-success').classList.add('hidden');
+            document.getElementById('step-details').classList.add('hidden');
+            document.getElementById('step-services').classList.add('hidden');
+            
+            document.getElementById('step-datetime').classList.remove('hidden');
+            document.getElementById('reschedule-alert').classList.remove('hidden');
+            
+            generateCalendar();
+            document.getElementById('step-datetime').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.cancelReschedule = function() {
+            const wasAdmin = state.isAdminRescheduling;
+            state.rescheduleMode = false;
+            state.isAdminRescheduling = false;
+            state.bookingToReplace = null;
+            document.getElementById('reschedule-alert').classList.add('hidden');
+            window.resetApp();
+            
+            if(wasAdmin) {
+                document.getElementById('client-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                if(document.getElementById('step-datetime').classList.contains('hidden') === false) {
+                    generateCalendar();
+                }
+            }
+        }
+
+        window.confirmCancelMyBooking = function(id) {
+            const owned=JSON.parse(localStorage.getItem('myBookings')||'[]').find(b=>b.id===id);
+            if(!owned?.token) return window.showAlert('Agendamento antigo','Solicite o cancelamento pelo aplicativo original ou WhatsApp.');
+            window.openConfirm("Deseja realmente cancelar este agendamento? Esta ação não pode ser desfeita.", async () => {
+                showLoading(true);
+                try {
+                    await deleteDoc(doc(db, "agendamentos", id));
+                    removeLocalMyBooking(id);
+                    window.showAlert("Cancelado", "Seu agendamento foi cancelado com sucesso.", false);
+                    checkLocalMyBookings();
+                } catch (error) {
+                    window.showAlert("Erro", "Não foi possível cancelar.");
+                }
+                showLoading(false);
+            });
+        }
+
+        window.resetApp = function() {
+            state.selectedService = null;
+            state.selectedServices = [];
+            state.selectedDate = null;
+            state.selectedTime = null;
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-phone').value = '';
+            
+            const btn = document.getElementById('btn-confirm');
+            btn.innerHTML = 'Confirmar Agendamento';
+            btn.disabled = false;
+
+            document.getElementById('step-success').style.display = 'none';
+            document.getElementById('step-success').classList.add('hidden');
+            document.getElementById('step-details').classList.add('hidden');
+            document.getElementById('step-datetime').classList.add('hidden');
+            document.getElementById('time-slots-container').classList.add('hidden');
+            document.getElementById('step-services').classList.remove('hidden');
+            
+            generateCalendar();
+            renderServices();
+            checkLocalMyBookings();
+        }
+
+        window.toggleAdmin = function() {
+            state.isAdmin = !state.isAdmin;
+            if(!state.isAdmin && auth) {
+                state.bookings=[];
+                signOut(auth).then(refreshAll).catch(()=>{});
+            }
+            if(state.isAdmin) {
+                document.getElementById('client-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-login').classList.remove('hidden');
+                document.getElementById('admin-dashboard').classList.add('hidden');
+            } else {
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('client-view').classList.remove('hidden');
+                checkLocalMyBookings();
+                if(document.getElementById('step-datetime').classList.contains('hidden') === false) {
+                    generateCalendar();
+                }
+            }
+        }
+
+        window.loginAdmin = async function() {
+            if(!db||!auth) return window.showAlert('Erro','Servidor indisponível.');
+            const email=document.getElementById('admin-email').value.trim();
+            const pwd=document.getElementById('admin-password').value;
+            if(!email||!pwd)return window.showAlert('Login','Informe e-mail e senha do Firebase Authentication.');
+            try{
+                const result=await signInWithEmailAndPassword(auth,email,pwd);
+                try{await apiCall('GET','admin-check');}
+                catch{await signOut(auth);return window.showAlert('Acesso negado','Conta não autorizada para administrar este aplicativo.');}
+                document.getElementById('admin-password').value='';
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                renderCampaignAdmin();renderAdminServices();renderIndicators();renderAdminHours();renderManualServices();
+                state.adminDateOffset=0;state.adminFilter='dia';
+                document.getElementById('admin-filter-type').value='dia';
+                await refreshAll();
+                renderAdminBookings();
+            }catch(err){console.warn('Falha de autenticação:',err.code);window.showAlert('Acesso negado','Confira as credenciais de administrador.');}
+        };
+
+        window.changeFilter = function() {
+            state.adminFilter = document.getElementById('admin-filter-type').value;
+            state.adminDateOffset = 0; 
+            renderAdminBookings();
+        }
+
+        window.changeAdminDate = function(offset) {
+            state.adminDateOffset += offset;
+            renderAdminBookings();
+        }
+
+        window.renderAdminBookings = function() {
+            const list = document.getElementById('admin-bookings-list');
+            list.innerHTML = '';
+            
+            let filteredBookings = [];
+            let dateLabel = '';
+            const controls = document.getElementById('admin-date-controls');
+            const revLabel = document.getElementById('revenue-label');
+
+            const targetDate = new Date();
+
+            if (state.adminFilter === 'dia') {
+                controls.classList.remove('hidden');
+                revLabel.innerText = "Neste dia";
+                targetDate.setDate(targetDate.getDate() + state.adminDateOffset);
+                const dateString = targetDate.toISOString().split('T')[0];
+                
+                if(state.adminDateOffset === 0) dateLabel = "Hoje";
+                else if(state.adminDateOffset === 1) dateLabel = "Amanhã";
+                else if(state.adminDateOffset === -1) dateLabel = "Ontem";
+                else dateLabel = targetDate.toLocaleDateString('pt-BR');
+                
+                filteredBookings = state.bookings.filter(b => b.data === dateString && b.status !== 'cancelado');
+            } 
+            else if (state.adminFilter === 'mes') {
+                controls.classList.remove('hidden');
+                revLabel.innerText = "Neste mês";
+                targetDate.setMonth(targetDate.getMonth() + state.adminDateOffset);
+                const monthString = targetDate.toISOString().slice(0, 7); 
+                
+                dateLabel = targetDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                filteredBookings = state.bookings.filter(b => b.data.startsWith(monthString) && b.status !== 'cancelado');
+            } 
+            else {
+                controls.classList.add('hidden');
+                revLabel.innerText = "No Geral";
+                dateLabel = "Todos os Agendamentos";
+                filteredBookings = state.bookings.filter(b => b.status !== 'cancelado');
+            }
+
+            document.getElementById('admin-current-date').innerText = dateLabel;
+
+            filteredBookings.sort((a, b) => {
+                const dateA = new Date(a.data + 'T' + a.hora);
+                const dateB = new Date(b.data + 'T' + b.hora);
+                return dateA - dateB;
+            });
+
+            let totalRevenue = 0;
+            let totalCount = filteredBookings.length;
+
+            const realTodayStr = getLocalTodayStr();
+
+            if(filteredBookings.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-gray-400 font-bold">Nenhum agendamento encontrado.</div>';
+            } else {
+                filteredBookings.forEach(b => {
+                    const isConfirmed = ['confirmado','concluido'].includes(b.status);
+                    const isFinished = b.status === 'concluido';
+                    const valorAtual = b.valorFinal !== undefined ? b.valorFinal : b.valorOriginal;
+                    
+                    totalRevenue += valorAtual;
+
+                    const isSameDay = (b.data === realTodayStr);
+
+                    const adminActions = `
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            ${!b.legado && b.status==='confirmado' ? `<button onclick="window.finishBooking('${b.id}')" class="flex-1 min-w-[30%] bg-emerald-50 text-emerald-600 text-xs font-bold py-2 rounded-lg">Concluir</button>` : ''}
+                            ${b.status==='pendente' && isSameDay && !b.legado ? `<button onclick="window.approveBooking('${b.id}')" class="flex-1 min-w-[30%] bg-green-500 text-white text-xs font-bold py-2 rounded-lg hover:bg-green-600 transition-colors">Aprovar</button>` : ''}
+                            
+                            <button ${b.legado?'disabled title="Gerencie pelo aplicativo original"':''} onclick="window.startAdminReschedule('${b.id}')" class="flex-1 min-w-[30%] bg-purple-50 text-purple-600 text-xs font-bold py-2 rounded-lg border border-purple-100 hover:bg-purple-100 transition-colors flex justify-center items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                Reagendar
+                            </button>
+                            
+                            <button ${b.legado?'disabled title="Gerencie pelo aplicativo original"':''} onclick="window.openDiscountModal('${b.id}', ${valorAtual})" class="flex-1 min-w-[30%] bg-blue-50 text-blue-600 text-xs font-bold py-2 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors flex justify-center items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                Alterar $
+                            </button>
+                            
+                            <button onclick="window.adminWhatsAppById('${b.id}')" class="flex-1 min-w-[30%] bg-[#25D366] text-white text-xs font-bold py-2 rounded-lg hover:bg-[#20bd5a] transition-colors flex justify-center items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                WhatsApp
+                            </button>
+                            
+                            <button ${b.legado?'disabled title="Gerencie pelo aplicativo original"':''} onclick="window.cancelBookingAdmin('${b.id}')" class="flex-1 min-w-[30%] bg-gray-100 text-gray-600 text-xs font-bold py-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Cancelar</button>
+                        </div>
+                    `;
+
+                    const [yyyy, mm, dd] = b.data.split('-');
+                    const dataLista = `${dd}/${mm}`;
+
+                    const div = document.createElement('div');
+                    div.className = "p-4 hover:bg-gray-50 transition-colors";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-1 ${isConfirmed ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+                                    ${state.adminFilter !== 'dia' ? dataLista + ' às ' : ''}${b.hora} - ${isFinished ? 'Concluído' : isConfirmed ? 'Confirmado' : 'Pendente'}
+                                </span>
+                                <h4 class="font-bold text-gray-900">${escapeHtml(b.cliente)}</h4>
+                                ${b.telefoneCliente ? `<p class="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> ${escapeHtml(b.telefoneCliente)}</p>` : ''}
+                                <p class="text-sm text-gray-500 mt-1">${escapeHtml(b.servicoNome || b.servicos?.map(s=>s.nome).join(' + ') || '')} • ${b.duracao||0} min ${b.legado?'• <b>Agenda original (somente leitura)</b>':''}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-black text-gray-900">${formatCurrency(valorAtual)}</span>
+                                ${b.valorFinal !== undefined && b.valorFinal !== b.valorOriginal ? `<p class="text-[10px] text-gray-400 line-through">${formatCurrency(b.valorOriginal)}</p>` : ''}
+                            </div>
+                        </div>
+                        ${adminActions}
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            document.getElementById('total-revenue').innerText = formatCurrency(totalRevenue);
+            document.getElementById('total-bookings-count').innerText = totalCount;
+            renderIndicators();
+        }
+
+        window.approveBooking = async function(id) {
+            showLoading(true);
+            try {
+                await updateDoc(doc(db, "agendamentos", id), { status: 'confirmado' });
+            } catch (error) {
+                window.showAlert("Erro", "Falha ao aprovar.");
+            }
+            showLoading(false);
+        }
+
+        window.cancelBookingAdmin = function(id) {
+            const b = state.bookings.find(x => x.id === id);
+            window.openConfirm("Deseja cancelar este agendamento e avisar a cliente no WhatsApp?", async () => {
+                showLoading(true);
+                try {
+                    await updateDoc(doc(db, "agendamentos", id), { status: 'cancelado' });
+                    
+                    if (b && b.telefoneCliente) {
+                        let num = b.telefoneCliente.replace(/\D/g, '');
+                        if(num.length === 10 || num.length === 11) num = '55' + num;
+                        const [ano, mes, dia] = b.data.split('-');
+                        const dataBr = `${dia}/${mes}/${ano}`;
+                        
+                        const msg = `Olá ${b.cliente}, tudo bem? Aqui é do espaço ${CLIENTE_CONFIG.nome}.\n\nInfelizmente precisamos *CANCELAR* o seu agendamento de:\n💅 *${b.servicoNome}*\n📅 ${dataBr} às ${b.hora}\n\nPara reagendar, por favor nos chame ou acesse nosso app.`;
+                        
+                        const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+                        window.open(url, '_blank');
+                    }
+                } catch (error) {
+                    window.showAlert("Erro", "Falha ao cancelar.");
+                }
+                showLoading(false);
+            });
+        }
+
+        let targetDiscountId = null;
+
+        window.openDiscountModal = function(id, currentValue) {
+            targetDiscountId = id;
+            document.getElementById('discount-value').value = currentValue;
+            const modal = document.getElementById('discount-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        window.closeDiscountModal = function() {
+            const modal = document.getElementById('discount-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            targetDiscountId = null;
+        }
+
+        window.confirmDiscount = async function() {
+            if(!targetDiscountId) return;
+            
+            let valStr = document.getElementById('discount-value').value;
+            valStr = valStr.replace(',', '.'); 
+            
+            const newVal = parseFloat(valStr);
+            if(isNaN(newVal) || newVal < 0) {
+                window.showAlert("Ops", "Digite um valor válido.");
+                return;
+            }
+
+            const btn = document.querySelector('#discount-modal .bg-blue-500');
+            const originalText = btn.innerText;
+            btn.innerText = 'Salvando...';
+
+            try {
+                await updateDoc(doc(db, "agendamentos", targetDiscountId), { valorFinal: newVal });
+                window.closeDiscountModal();
+            } catch (error) {
+                window.showAlert("Erro", "Falha ao salvar valor.");
+            }
+            btn.innerText = originalText;
+        }
+
+        // ==========================================
+        // GESTÃO DE BLOQUEIOS (FOLGAS/FÉRIAS/PERÍODOS)
+        // ==========================================
+        window.openBlocksModal = function() {
+            document.getElementById('block-start').value = '';
+            document.getElementById('block-end').value = '';
+            document.getElementById('block-period').value = 'integral';
+            const modal = document.getElementById('blocks-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            renderBlocksList();
+        }
+
+        window.closeBlocksModal = function() {
+            const modal = document.getElementById('blocks-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        window.saveBlock = async function() {
+            const start = document.getElementById('block-start').value;
+            const end = document.getElementById('block-end').value || start;
+            const period = document.getElementById('block-period').value;
+
+            if(!start) {
+                window.showAlert("Erro", "Por favor, selecione uma data de início para bloquear.");
+                return;
+            }
+
+            const [sYear, sMonth, sDay] = start.split('-').map(Number);
+            const [eYear, eMonth, eDay] = end.split('-').map(Number);
+
+            let curr = new Date(sYear, sMonth - 1, sDay);
+            let last = new Date(eYear, eMonth - 1, eDay);
+
+            if(curr > last) {
+                window.showAlert("Erro", "A data final não pode ser antes da data inicial.");
+                return;
+            }
+
+            showLoading(true);
+            try {
+                while(curr <= last) {
+                    const yyyy = curr.getFullYear();
+                    const mm = String(curr.getMonth() + 1).padStart(2, '0');
+                    const dd = String(curr.getDate()).padStart(2, '0');
+                    const dateStr = `${yyyy}-${mm}-${dd}`;
+                    
+                    const alreadyExists = state.bloqueios.some(b => b.data === dateStr && b.periodo === period);
+                    
+                    if(!alreadyExists) {
+                        await addDoc(collection(db, "bloqueios"), { data: dateStr, periodo: period });
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
+                
+                document.getElementById('block-start').value = '';
+                document.getElementById('block-end').value = '';
+            } catch(e) {
+                window.showAlert("Erro", "Falha ao bloquear data(s).");
+            }
+            showLoading(false);
+        }
+
+        window.renderBlocksList = function() {
+            const list = document.getElementById('blocks-list');
+            if(!list) return;
+            list.innerHTML = '';
+            
+            const todayStr = getLocalTodayStr();
+            const activeBlocks = state.bloqueios.filter(b => b.data >= todayStr).sort((a,b) => a.data.localeCompare(b.data));
+
+            if(activeBlocks.length === 0) {
+                list.innerHTML = '<p class="text-xs text-gray-400 font-bold mt-2">Você não tem folgas ou férias programadas no momento.</p>';
+                return;
+            }
+
+            const periodosMap = {
+                'integral': 'Dia Inteiro',
+                'manha': 'Manhã',
+                'tarde': 'Tarde'
+            };
+
+            activeBlocks.forEach(b => {
+                const [y, m, d] = b.data.split('-');
+                const periodoStr = b.periodo ? periodosMap[b.periodo] || 'Dia Inteiro' : 'Dia Inteiro';
+                
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200";
+                div.innerHTML = `
+                    <span class="text-sm font-bold text-gray-700">${d}/${m}/${y} <span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1">${periodoStr}</span></span>
+                    <button onclick="window.removeBlock('${b.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Remover Bloqueio">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        window.removeBlock = async function(id) {
+            showLoading(true);
+            try {
+                await deleteDoc(doc(db, "bloqueios", id));
+            } catch (error) {
+                window.showAlert("Erro", "Falha ao remover o bloqueio.");
+            }
+            showLoading(false);
+        }
+
+
+        function loadCampaignsFromFirebase(){
+            onSnapshot(query(collection(db,'beautyStudioCampanhas')), snap=>{
+                state.campaigns=snap.docs.map(d=>({id:d.id,...d.data()})); renderServices(); renderCampaignAdmin();
+            },err=>console.warn('Não foi possível carregar campanhas',err));
+        }
+        function loadServicesFromFirebase(){
+            onSnapshot(query(collection(db,'beautyStudioServicos')), snap=>{
+                if(!snap.empty){const changes=snap.docs.map(d=>({id:d.id,...d.data()}));
+                    changes.forEach(v=>{const pos=CLIENTE_CONFIG.servicos.findIndex(s=>s.id===v.id); if(pos>=0) Object.assign(CLIENTE_CONFIG.servicos[pos],v);else CLIENTE_CONFIG.servicos.push(v);});
+                }
+                renderServices(); renderAdminServices();
+            },err=>console.warn('Não foi possível carregar serviços',err));
+        }
+        function renderCampaignAdmin(){
+            const list=document.getElementById('campaigns-admin-list'), checks=document.getElementById('campaign-services');if(!list||!checks)return;
+            checks.innerHTML=CLIENTE_CONFIG.servicos.map(s=>`<label class="flex items-start gap-1"><input type="checkbox" class="campaign-service" value="${escapeHtml(s.id)}" checked><span>${escapeHtml(s.nome)}</span></label>`).join('');
+            list.innerHTML=state.campaigns.length?state.campaigns.map(c=>`<div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2 text-sm"><span>${escapeHtml(c.nome)} — ${c.percentual}% • ${c.ativo?'Ativa':'Inativa'}</span><div><button class="text-brand-600 font-bold" onclick="window.editCampaign('${escapeHtml(c.id)}')">Editar</button> <button class="text-red-500 font-bold ml-2" onclick="window.removeCampaign('${escapeHtml(c.id)}')">Excluir</button></div></div>`).join(''):'<p class="text-gray-400 text-xs">Nenhuma campanha cadastrada.</p>';
+        }
+        let editingCampaignId=null;
+        window.editCampaign=id=>{
+            const c=state.campaigns.find(x=>x.id===id);if(!c)return;editingCampaignId=id;
+            document.getElementById('campaign-name').value=c.nome;
+            document.getElementById('campaign-discount').value=c.percentual;
+            document.getElementById('campaign-enabled').value=String(c.ativo);
+            document.getElementById('campaign-start').value=c.inicio;
+            document.getElementById('campaign-end').value=c.fim;
+            document.querySelectorAll('.campaign-service').forEach(x=>x.checked=c.servicos.includes(x.value));
+        };
+        window.saveCampaign=async()=>{
+            if(!db) return window.showAlert('Erro','O servidor não está disponível.');
+            const name=document.getElementById('campaign-name').value.trim(),percent=Number(document.getElementById('campaign-discount').value);
+            const inicio=document.getElementById('campaign-start').value,fim=document.getElementById('campaign-end').value;
+            if(!name||!inicio||!fim||fim<inicio||!Number.isFinite(percent)||percent<0||percent>100)return window.showAlert('Erro','Confira nome, datas e percentual (0 a 100).');
+            const data={nome:name,percentual:percent,ativo:document.getElementById('campaign-enabled').value==='true',inicio,fim,servicos:[...document.querySelectorAll('.campaign-service:checked')].map(x=>x.value)};
+            try {if(editingCampaignId)await updateDoc(doc(db,'beautyStudioCampanhas',editingCampaignId),data);else await addDoc(collection(db,'beautyStudioCampanhas'),data);editingCampaignId=null;window.showAlert('Pronto','Promoção salva.');}
+            catch(e){console.error(e);window.showAlert('Erro','Não foi possível salvar a campanha.');}
+        };
+        window.removeCampaign=id=>window.openConfirm('Excluir esta campanha?',async()=>{try{await deleteDoc(doc(db,'beautyStudioCampanhas',id));editingCampaignId=null;}catch(e){window.showAlert('Erro','Não foi possível excluir.');}});
+        function renderAdminServices(){
+            const list=document.getElementById('admin-services-list');if(!list)return;
+            list.innerHTML=CLIENTE_CONFIG.servicos.map(s=>`<div class="flex items-center justify-between gap-2 text-xs bg-gray-50 rounded-xl p-2"><span class="flex-1">${escapeHtml(s.nome)} — ${formatCurrency(s.valor)} / ${s.duracao}min</span><button class="text-brand-600 font-bold" onclick="window.editService('${escapeHtml(s.id)}')">Editar</button></div>`).join('');
+        }
+        window.editService=async id=>{
+            if(!db)return window.showAlert('Erro','O servidor não está disponível.');
+            const s=CLIENTE_CONFIG.servicos.find(x=>x.id===id);if(!s)return;
+            const nome=prompt('Nome do serviço',s.nome);if(nome===null)return;
+            const valor=Number(prompt('Valor normal (R$)',s.valor));const duracao=Number(prompt('Duração em minutos',s.duracao));
+            const fotoUrl=prompt('URL HTTPS da foto (opcional)',s.fotoUrl||'');if(fotoUrl===null)return;
+            const ativo=confirm('Manter serviço ATIVO para agendamentos? (Cancelar = inativo)');
+            if(!nome.trim()||!Number.isFinite(valor)||valor<0||!Number.isInteger(duracao)||duracao<10)return window.showAlert('Erro','Dados inválidos.');
+            try{await (async()=>{const ref=doc(db,'beautyStudioServicos',s.id);await setDoc(ref,{nome:nome.trim(),valor,duracao,ativo,fotoUrl},{merge:true});})();}
+            catch(e){console.error(e);window.showAlert('Erro','Não foi possível editar.');}
+        };
+        window.addNewService=async()=>{
+            if(!db)return window.showAlert('Erro','O servidor não está disponível.');
+            const nome=prompt('Nome do novo serviço');if(!nome?.trim())return;
+            const valor=Number(prompt('Valor normal (R$)'));const duracao=Number(prompt('Duração em minutos'));
+            if(!Number.isFinite(valor)||valor<0||!Number.isInteger(duracao)||duracao<1)return window.showAlert('Erro','Valores inválidos.');
+            try{await addDoc(collection(db,'beautyStudioServicos'),{nome:nome.trim(),valor,duracao,ativo:true});}
+            catch(e){window.showAlert('Erro','Não foi possível adicionar.');}
+        };
+        function renderIndicators(){
+            const el=document.getElementById('admin-indicators');if(!el)return;
+            const active=state.bookings.filter(b=>b.status!=='cancelado'),today=getLocalTodayStr(),month=today.slice(0,7);
+            const entries=[['Hoje',active.filter(b=>b.data===today).length],['Mês',active.filter(b=>b.data?.startsWith(month)).length],['Serviços agendados',active.reduce((a,b)=>a+(b.servicos?.length||1),0)],['Cancelados',state.bookings.filter(b=>b.status==='cancelado').length],['Previsão',formatCurrency(active.reduce((a,b)=>a+Number(b.valorFinal??b.valorOriginal??0),0))],['Concluídos',state.bookings.filter(b=>b.status==='concluido').length],['Realizado',formatCurrency(state.bookings.filter(b=>b.status==='concluido').reduce((a,b)=>a+Number(b.valorFinal??b.valorOriginal??0),0))]];
+            el.innerHTML=entries.map(([name,value])=>`<div class="bg-gray-50 rounded-xl p-2"><span class="block text-xs text-gray-500">${name}</span><strong>${value}</strong></div>`).join('');
+        }
+
+        window.finishBooking=async id=>{
+            try{await updateDoc(doc(db,'agendamentos',id),{status:'concluido'});}
+            catch(e){window.showAlert('Erro',e.message||'Não foi possível concluir o atendimento.');}
+        };
+        function loadHoursFromFirebase(){
+            onSnapshot(query(collection(db,'beautyStudioSettings')),snap=>{
+                const hours=snap.docs[0]?.data()?.hours;
+                if(hours){CLIENTE_CONFIG.horariosPorDia=hours;CLIENTE_CONFIG.diasFuncionamento=Object.keys(hours).map(Number);}
+                renderAdminHours();generateCalendar();
+            });
+        }
+        function renderAdminHours(){
+            const el=document.getElementById('admin-hours-list');if(!el)return;
+            const labels=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+            el.innerHTML=labels.map((name,i)=>{
+                const h=CLIENTE_CONFIG.horariosPorDia[i];
+                return `<div class="grid grid-cols-3 gap-2 items-center text-xs"><label class="flex items-center gap-1"><input class="opening-enabled" data-day="${i}" type="checkbox" ${h?'checked':''}>${name}</label><input class="opening-start border rounded-lg px-2 py-2" data-day="${i}" type="time" value="${h?.inicio||'09:00'}"><input class="opening-end border rounded-lg px-2 py-2" data-day="${i}" type="time" value="${h?.fim||'18:00'}"></div>`;
+            }).join('');
+        }
+        window.saveOpeningHours=async()=>{
+            const hours={};for(const c of document.querySelectorAll('.opening-enabled:checked')){
+                const d=c.dataset.day,start=document.querySelector(`.opening-start[data-day="${d}"]`).value,end=document.querySelector(`.opening-end[data-day="${d}"]`).value;
+                if(!start||!end||start>=end)return window.showAlert('Erro','Confira os horários de abertura e fechamento.');
+                hours[d]={inicio:start,fim:end};
+            }
+            try{await apiCall('PUT','beautyStudioSettings','hours',{data:{hours}});await refreshAll();window.showAlert('Horários','Horários atualizados.',false);}
+            catch(e){window.showAlert('Erro',e.message);}
+        };
+        function renderManualServices(){
+            const el=document.getElementById('manual-services');if(!el)return;
+            el.innerHTML=CLIENTE_CONFIG.servicos.filter(s=>s.ativo!==false).map(s=>`<label class="flex gap-1 items-start"><input type="checkbox" class="manual-service" value="${escapeHtml(s.id)}">${escapeHtml(s.nome)}</label>`).join('');
+        }
+        window.saveManualBooking=async()=>{
+            const ids=[...document.querySelectorAll('.manual-service:checked')].map(x=>x.value);
+            const nome=document.getElementById('manual-client').value.trim(),phone=document.getElementById('manual-phone').value;
+            const day=document.getElementById('manual-day').value,time=document.getElementById('manual-time').value;
+            if(!ids.length||!day||!time||!nome||phone.replace(/\D/g,'').length<10)return window.showAlert('Erro','Preencha serviços, nome, telefone, data e horário.');
+            const data={cliente:nome,telefoneCliente:phone,data:day,hora:time,servicos:ids.map(id=>({id}))};
+            try{await addDoc(collection(db,'agendamentos'),data);await refreshAll();window.showAlert('Agendado','Atendimento cadastrado.',false);}
+            catch(e){window.showAlert('Erro',e.message);}
+        };
+        initApp();
+    </script>
+</body>
+</html>
